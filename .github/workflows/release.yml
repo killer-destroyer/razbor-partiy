@@ -56,16 +56,21 @@ jobs:
 
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
-          name: Разбор партий ${{ github.ref_name }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Разбор партий ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || steps.version.outputs.tag }}
           files: artifacts/*
           body: |
             ## Как скачать
