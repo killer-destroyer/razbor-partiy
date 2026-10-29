@@ -1,0 +1,9 @@
+node_modules/
+out/
+dist/
+resources/bin/stockfish
+resources/bin/stockfish-*
+*.log
+.DS_Store
+build/icon.iconset/
+!build/

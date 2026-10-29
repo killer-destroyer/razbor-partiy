@@ -1,0 +1,77 @@
+name: Сборка и выпуск
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  build:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            script: dist:mac
+            name: mac
+          - os: windows-latest
+            script: dist:win
+            name: windows
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run ${{ matrix.script }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: razbor-partiy-${{ matrix.name }}
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.exe
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Разбор партий ${{ github.ref_name }}
+          files: artifacts/*
+          body: |
+            ## Как скачать
+
+            **Mac (Apple Silicon: M1–M4, A18):** файл `RazborPartiy-…-mac-arm64.dmg`. Откройте его и перетащите «Разбор партий» в «Программы». При первом запуске: правый клик по приложению → «Открыть» (или «Системные настройки → Конфиденциальность и безопасность → Всё равно открыть»).
+
+            **Windows 10/11 (64 бита):** установщик `RazborPartiy-Setup-…-win-x64.exe` или переносная версия `RazborPartiy-Portable-…-win-x64.exe` (запускается без установки). Если появится синее окно SmartScreen — «Подробнее» → «Выполнить в любом случае».
+
+            Stockfish уже внутри — ничего докачивать не нужно.

@@ -1,0 +1,8 @@
+Задачи — выборка из базы задач lichess.org (https://database.lichess.org/#puzzles),
+распространяется по лицензии Creative Commons CC0 (общественное достояние).
+Выборка: 83 202 задачи, равномерно по рейтингу (400–3000) и по 58 темам;
+отобраны задачи с популярностью ≥ 80, отклонением рейтинга ≤ 100 и не менее 200 решениями.
+Пересобрать: zstd -dc lichess_db_puzzle.csv.zst | python3 scripts/sample-puzzles.py 2000 | gzip -9 > resources/puzzles/puzzles.tsv.gz
+
+Композиции (compositions.json) — позиции из знаменитых партий, ловушек и этюдов XVIII–XX веков,
+решения построены и проверены Stockfish (scripts/build-compositions.ts, отчёт — docs/compositions-verification.txt).

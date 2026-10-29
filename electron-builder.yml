@@ -1,0 +1,83 @@
+appId: local.arsen.razbor
+productName: RazborPartiy
+copyright: Copyright © 2026 Arsen
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - package.json
+asarUnpack:
+  - "**/*.node"
+extraResources:
+  - from: resources
+    to: .
+    filter:
+      - "**/*"
+      - "!engines/**"
+      - "!bin/**"
+  - from: resources/engines
+    to: engines-license
+    filter:
+      - "*.txt"
+      - "*.md"
+mac:
+  category: public.app-category.board-games
+  target:
+    - target: dmg
+      arch: arm64
+    - target: zip
+      arch: arm64
+  icon: build/icon.icns
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  darkModeSupport: true
+  artifactName: RazborPartiy-${version}-mac-${arch}.${ext}
+  extraResources:
+    - from: resources/engines/darwin-arm64
+      to: bin
+    - from: build/lproj
+      to: .
+  extendInfo:
+    CFBundleDisplayName: RazborPartiy
+    LSHasLocalizedDisplayName: true
+    LSApplicationCategoryType: public.app-category.board-games
+    NSHumanReadableCopyright: Разбор партий — личное приложение для анализа шахматных партий
+win:
+  target:
+    - target: nsis
+      arch: x64
+    - target: portable
+      arch: x64
+  icon: build/icon.png
+  executableName: RazborPartiy
+  extraResources:
+    - from: resources/engines/win32-x64
+      to: bin
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Разбор партий
+  uninstallDisplayName: Разбор партий
+  installerLanguages:
+    - ru_RU
+  language: "1049"
+  artifactName: RazborPartiy-Setup-${version}-win-x64.${ext}
+portable:
+  artifactName: RazborPartiy-Portable-${version}-win-x64.${ext}
+afterPack: scripts/adhoc-sign.cjs
+publish: null
+dmg:
+  title: RazborPartiy
+  contents:
+    - x: 140
+      y: 180
+    - x: 400
+      y: 180
+      type: link
+      path: /Applications
+npmRebuild: true
